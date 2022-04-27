@@ -1,13 +1,13 @@
+import 'dart:convert' show json;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final itemsStreamProvider = StreamProvider<List<Item>>((ref) {
-  final collection = FirebaseFirestore.instance.collection('items');
-  final stream = collection.snapshots().map(
-        (e) => e.docs.map((e) => Item.fromJson(e.data())).toList(),
-      );
-
-  return stream;
+final configProvider = FutureProvider<Map<String, Object?>>((ref) async {
+  final jsonString = await rootBundle.loadString('assets/config.json');
+  final content = json.decode(jsonString) as Map<String, Object?>;
+  return content;
 });
 
 void main() {
@@ -23,21 +23,19 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final items = ref.watch(itemsStreamProvider);
+    final config = ref.watch(configProvider);
     return MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
         home: Scaffold(
-          body: items.when(
+          body: config.when(
               loading: () => const CircularProgressIndicator(),
               error: (error, stack) => Text('Error: $error'),
-              data: (items) {
-                final item = items[index];
-                return ListTile(
-                  title: Text(item.name),
-                );
+              data: (config) {
+                print(config);
+                return const Text('test');
               }),
         ));
   }
