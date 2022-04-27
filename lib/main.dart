@@ -30,28 +30,24 @@ void main() {
   );
 }
 
-class MyApp extends ConsumerWidget {
+class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final counter = ref.watch(counterProvider);
+  Widget build(BuildContext context) {
     return MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
         home: Scaffold(
-          appBar: AppBar(title: const Text('riverpod_example')),
-          body: ListView(
-            children: [
-              Text('Count: ${counter.count}'),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: counter.increase,
-            child: const Icon(Icons.add),
-          ),
-        ));
+            appBar: AppBar(title: const Text('riverpod_example')),
+            body: Consumer(
+              builder: (context, ref, child) {
+                final count = ref.watch(counterProvider);
+                print(count);
+                return Text('$count');
+              },
+            )));
   }
 }
