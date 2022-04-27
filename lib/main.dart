@@ -1,15 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final itemsStreamProvider = StreamProvider<List<Item>>((ref) {
-  final collection = FirebaseFirestore.instance.collection('items');
-  final stream = collection.snapshots().map(
-        (e) => e.docs.map((e) => Item.fromJson(e.data())).toList(),
-      );
+class Counter extends ChangeNotifier {
+  int count = 0;
 
-  return stream;
-});
+  void increase() {
+    count++;
+    notifyListeners();
+  }
 
+  void decrease() {
+    count--;
+    notifyListeners();
+  }
+
+  void reset() {
+    count = 0;
+    notifyListeners();
+  }
+}
+
+// Providerの定数をグローバルに宣言
+final counterProvider = ChangeNotifierProvider((ref) => Counter());
 void main() {
   runApp(
     const ProviderScope(
@@ -23,22 +35,23 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final items = ref.watch(itemsStreamProvider);
+    final counter = ref.watch(counterProvider);
     return MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
         home: Scaffold(
-          body: items.when(
-              loading: () => const CircularProgressIndicator(),
-              error: (error, stack) => Text('Error: $error'),
-              data: (items) {
-                final item = items[index];
-                return ListTile(
-                  title: Text(item.name),
-                );
-              }),
+          appBar: AppBar(title: const Text('riverpod_example')),
+          body: ListView(
+            children: [
+              Text('Count: ${counter.count}'),
+            ],
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: counter.increase,
+            child: const Icon(Icons.add),
+          ),
         ));
   }
 }
