@@ -1,15 +1,13 @@
+import 'dart:convert' show json;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// Providerの定数をグローバルに宣言
-final counterProvider = StateProvider<int>((ref) {
-  return 0;
-});
-
-final doubleCounterProvider = Provider<int>((ref) {
-  final count = ref.watch(counterProvider);
-
-  return count * 2;
+final configProvider = FutureProvider<Map<String, Object?>>((ref) async {
+  final jsonString = await rootBundle.loadString('assets/config.json');
+  final content = json.decode(jsonString) as Map<String, Object?>;
+  return content;
 });
 
 void main() {
@@ -25,25 +23,20 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final counter = ref.watch(counterProvider.notifier);
-    final doubleCount = ref.watch(doubleCounterProvider);
+    final config = ref.watch(configProvider);
     return MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
         home: Scaffold(
-          appBar: AppBar(title: const Text('riverpod_example')),
-          body: ListView(
-            children: [
-              Text('２倍の値:$doubleCount'),
-              Text('Count: ${ref.watch(counterProvider)}'),
-              ElevatedButton(
-                onPressed: () => counter.update((state) => state + 1),
-                child: Text('Count: ${ref.watch(counterProvider)}'),
-              )
-            ],
-          ),
+          body: config.when(
+              loading: () => const CircularProgressIndicator(),
+              error: (error, stack) => Text('Error: $error'),
+              data: (config) {
+                print(config);
+                return const Text('test');
+              }),
         ));
   }
 }
