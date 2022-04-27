@@ -1,28 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Counter extends ChangeNotifier {
-  int count = 0;
+class Counter extends StateNotifier<int> {
+  int count;
+
+  const Counter({required this.count});
 
   void increase() {
     count++;
-    notifyListeners();
+    // notifyListeners();
   }
 
   void decrease() {
     count--;
-    notifyListeners();
+    // notifyListeners();
   }
 
   void reset() {
     count = 0;
-    notifyListeners();
+    // notifyListeners();
   }
 }
 
 // Providerの定数をグローバルに宣言
 // final counterProvider = ChangeNotifierProvider((ref) => Counter());
-final counterProvider = StateProvider((ref) => 0);
+final counterProvider = StateNotifierProvider<Counter, int>((ref) => Counter());
 void main() {
   runApp(
     const ProviderScope(
@@ -59,28 +61,16 @@ class MyApp extends ConsumerWidget {
   }
 }
 
-class Dialog extends ConsumerWidget {
-  const Dialog({Key? key}) : super(key: key);
+class RefRead extends ConsumerWidget {
+  const RefRead({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.listen<int>(
-      counterProvider,
-      (previous, next) {
-        if (next.isEven) {
-          return;
-        }
-        showDialog(
-            context: context,
-            builder: (context) {
-              return const AlertDialog(
-                title: Text('Current number is 奇数！'),
-              );
-            });
-      },
-      onError: (error, stackTrace) => debugPrint('$error'),
+    // final counter = ref.watch(counterProvider.notifier);
+    return ElevatedButton(
+      onPressed: () =>
+          ref.read(counterProvider.notifier).update((state) => state + 1),
+      child: const Text("+1"),
     );
-
-    return Container();
   }
 }
