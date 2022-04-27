@@ -21,8 +21,7 @@ class Counter extends ChangeNotifier {
 }
 
 // Providerの定数をグローバルに宣言
-// final counterProvider = ChangeNotifierProvider((ref) => Counter());
-final counterProvider = StateProvider((ref) => 0);
+final counterProvider = ChangeNotifierProvider((ref) => Counter());
 void main() {
   runApp(
     const ProviderScope(
@@ -56,31 +55,5 @@ class MyApp extends ConsumerWidget {
             child: const Icon(Icons.add),
           ),
         ));
-  }
-}
-
-class Dialog extends ConsumerWidget {
-  const Dialog({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    ref.listen<int>(
-      counterProvider,
-      (previous, next) {
-        if (next.isEven) {
-          return;
-        }
-        showDialog(
-            context: context,
-            builder: (context) {
-              return const AlertDialog(
-                title: Text('Current number is 奇数！'),
-              );
-            });
-      },
-      onError: (error, stackTrace) => debugPrint('$error'),
-    );
-
-    return Container();
   }
 }
